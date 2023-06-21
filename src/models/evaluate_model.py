@@ -2,7 +2,7 @@ import tensorflow as tf
 
 data_dir = "data/raw/pinterest"
 report_path = "output/report.txt"
-model_path = "src/models/binary-classifier-colab"
+model_path = "models/binary-classifier-colab"
 
 
 def evaluate() -> None:

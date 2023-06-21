@@ -7,7 +7,7 @@ with open("data/external/imagenet-labels.txt", "r") as f:
     imagenet_classifier_labels = [
         i.rstrip().strip("\"") for i in f.readlines()
         ]
-pet_images_classifier = tf.keras.models.load_model("src/models/binary-classifier")
+pet_images_classifier = tf.keras.models.load_model("models/binary-classifier")
 
 
 @app.route("/")
