@@ -100,7 +100,7 @@ def train_model(epochs: int, batch_size: int) -> None:
         validation_data=val_ds,
     )
 
-    model.save("src/models/binary-classifier")
+    model.save("models/binary-classifier")
 
 
 if __name__ == "__main__":
