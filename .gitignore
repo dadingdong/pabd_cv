@@ -1,3 +1,4 @@
 /notebooks/.ipynb_checkpoints/
 /services/__pycache__/
 /test/__pycache__/
+.env
