@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import click
 
 
 def make_model(input_shape, num_classes):
@@ -49,51 +50,58 @@ def make_model(input_shape, num_classes):
     return keras.Model(inputs, outputs)
 
 
-# Generate a data set.
-image_size = (180, 180)
-batch_size = 128
+@click.command()
+@click.option("-e", "--epochs", default=4)
+@click.option("-b", "--batch_size", default=2)
+def train_model(epochs: int, batch_size: int) -> None:
+    # Generate a data set.
+    image_size = (180, 180)
 
-train_ds, val_ds = tf.keras.utils.image_dataset_from_directory(
-    "data/processed/pet-images",
-    validation_split=0.2,
-    subset="both",
-    seed=1337,
-    image_size=image_size,
-    batch_size=batch_size,
-)
+    train_ds, val_ds = tf.keras.utils.image_dataset_from_directory(
+        "data/processed/pet-images",
+        validation_split=0.2,
+        subset="both",
+        seed=1337,
+        image_size=image_size,
+        batch_size=batch_size,
+    )
 
-# Data augmentation.
-data_augmentation = keras.Sequential(
-    [
-        layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1),
-    ]
-)
+    # Data augmentation.
+    data_augmentation = keras.Sequential(
+        [
+            layers.RandomFlip("horizontal"),
+            layers.RandomRotation(0.1),
+        ]
+    )
 
-# Apply `data_augmentation` to the training images.
-train_ds = train_ds.map(
-    lambda img, label: (data_augmentation(img), label),
-    num_parallel_calls=tf.data.AUTOTUNE,
-)
-# Prefetching samples in GPU memory helps maximize GPU utilization.
-train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
-val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
+    # Apply `data_augmentation` to the training images.
+    train_ds = train_ds.map(
+        lambda img, label: (data_augmentation(img), label),
+        num_parallel_calls=tf.data.AUTOTUNE,
+    )
+    # Prefetching samples in GPU memory helps maximize GPU utilization.
+    train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+    val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
 
-# Build the model.
-model = make_model(input_shape=image_size + (3,), num_classes=2)
+    # Build the model.
+    model = make_model(input_shape=image_size + (3,), num_classes=2)
 
-# Train the model.
-epochs = 5
+    # Train the model.
+    epochs = epochs
 
-model.compile(
-    optimizer=keras.optimizers.Adam(1e-3),
-    loss="binary_crossentropy",
-    metrics=["accuracy"],
-)
-model.fit(
-    train_ds,
-    epochs=epochs,
-    validation_data=val_ds,
-)
+    model.compile(
+        optimizer=keras.optimizers.Adam(1e-3),
+        loss="binary_crossentropy",
+        metrics=["accuracy"],
+    )
+    model.fit(
+        train_ds,
+        epochs=epochs,
+        validation_data=val_ds,
+    )
 
-model.save("src/models/binary-classifier")
+    model.save("src/models/binary-classifier")
+
+
+if __name__ == "__main__":
+    train_model()
